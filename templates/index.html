@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduGenie • AI Learning Companion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+
+    <!-- App Navigation Header -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="brand-group">
+                <div class="brand-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h2>EduGenie <span class="ai-pill">AI</span></h2>
+                    <p>Next-Gen Intelligent Learning Assistant</p>
+                </div>
+            </div>
+
+            <div class="header-status">
+                <span class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>AI Online</span>
+                </span>
+                <span class="status-indicator supabase-indicator" id="supabaseStatusBadge" title="Supabase Cloud Database Sync">
+                    <span class="supabase-dot"></span>
+                    <span>Supabase Cloud</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-wrapper">
+        
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">Learn Smarter, Faster & Deeper</h1>
+            <p class="hero-subtitle">Your personal AI tutor powered by Google Gemini, local edge intelligence, and Supabase cloud persistence. Ask questions, generate quizzes, and track your learning journey.</p>
+
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs" role="tablist">
+                <button class="nav-tab active" onclick="switchTab('all', this)">
+                    <span class="tab-icon">✨</span>
+                    <span>All Features</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('qa', this)">
+                    <span class="tab-icon">💬</span>
+                    <span>Q&A Tutor</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('explain', this)">
+                    <span class="tab-icon">💡</span>
+                    <span>Explainer</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('summary', this)">
+                    <span class="tab-icon">📝</span>
+                    <span>Summarizer</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('quiz', this)">
+                    <span class="tab-icon">🎯</span>
+                    <span>Quiz Generator</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('recommend', this)">
+                    <span class="tab-icon">🗺️</span>
+                    <span>Learning Paths</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('history', this); loadHistory();">
+                    <span class="tab-icon">📜</span>
+                    <span>Cloud History</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Tool Cards Container -->
+        <div class="tools-grid">
+
+            <!-- 1. Q&A Module -->
+            <div class="tool-card" id="card_qa">
+                <div class="card-header">
+                    <div class="card-icon icon-qa">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Ask EduGenie a Question</h3>
+                        <p>Instant, smart and concise answers to any academic question</p>
+                    </div>
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="prompt-chips">
+                    <span class="chip-label">Try:</span>
+                    <button type="button" class="chip" onclick="fillInput('question', 'Which is the largest ocean?')">Which is the largest ocean?</button>
+                    <button type="button" class="chip" onclick="fillInput('question', 'Why is the sky blue?')">Why is the sky blue?</button>
+                    <button type="button" class="chip" onclick="fillInput('question', 'What causes solar eclipses?')">Solar eclipses</button>
+                </div>
+
+                <form id="qaForm" onsubmit="handleQA(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="question" placeholder="Ask anything... e.g., How does photosynthesis work?" required>
+                        <button type="submit" id="qaBtn" class="btn btn-primary">
+                            <span>Get Answer</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="qaResult" class="output-container" style="display: none;"></div>
+            </div>
+
+            <!-- 2. Concept Explanation Module -->
+            <div class="tool-card" id="card_explain">
+                <div class="card-header">
+                    <div class="card-icon icon-explain">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Need an Explanation?</h3>
+                        <p>Simplifies complex topics with child-friendly intuitive metaphors</p>
+                    </div>
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="prompt-chips">
+                    <span class="chip-label">Try:</span>
+                    <button type="button" class="chip" onclick="fillInput('topic', 'Quantum Computing')">Quantum Computing</button>
+                    <button type="button" class="chip" onclick="fillInput('topic', 'Binary Search Algorithm')">Binary Search</button>
+                    <button type="button" class="chip" onclick="fillInput('topic', 'DNA Replication')">DNA Replication</button>
+                </div>
+
+                <form id="explainForm" onsubmit="handleExplain(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="topic" placeholder="Enter topic... e.g. Photosynthesis, Black Holes" required>
+                        <button type="submit" id="explainBtn" class="btn btn-emerald">
+                            <span>Explain</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="explanationResult" class="output-container" style="display: none;"></div>
+            </div>
+
+            <!-- 3. Summarization Module -->
+            <div class="tool-card" id="card_summary">
+                <div class="card-header">
+                    <div class="card-icon icon-summary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="21" y1="10" x2="3" y2="10"></line>
+                            <line x1="21" y1="6" x2="3" y2="6"></line>
+                            <line x1="21" y1="14" x2="3" y2="14"></line>
+                            <line x1="21" y1="18" x2="7" y2="18"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Summarize a Paragraph</h3>
+                        <p>Condense lengthy textbook passages and research text into key takeaways</p>
+                    </div>
+                </div>
+
+                <form id="summaryForm" onsubmit="handleSummary(event)">
+                    <div class="textarea-wrapper">
+                        <textarea id="summaryText" rows="4" placeholder="Paste your educational text or long article here to summarize..." required></textarea>
+                        <div class="textarea-actions">
+                            <span class="char-count" id="summaryCharCount">0 characters</span>
+                            <button type="submit" id="summaryBtn" class="btn btn-amber">
+                                <span>Summarize Passage</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="summaryResult" class="output-container" style="display: none;"></div>
+            </div>
+
+            <!-- 4. Interactive Quiz Module -->
+            <div class="tool-card" id="card_quiz">
+                <div class="card-header">
+                    <div class="card-icon icon-quiz">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Generate an Interactive Quiz</h3>
+                        <p>Test and reinforce your mastery with auto-evaluated multiple choice questions</p>
+                    </div>
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="prompt-chips">
+                    <span class="chip-label">Try:</span>
+                    <button type="button" class="chip" onclick="fillInput('quizText', 'Pythagoras theorem')">Pythagoras theorem</button>
+                    <button type="button" class="chip" onclick="fillInput('quizText', 'Solar System')">Solar System</button>
+                    <button type="button" class="chip" onclick="fillInput('quizText', 'Machine Learning Basics')">Machine Learning</button>
+                </div>
+
+                <form id="quizForm" onsubmit="handleQuiz(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="quizText" placeholder="Enter a subject or paste reference text... e.g. Pythagoras Theorem" required>
+                        <button type="submit" id="quizBtn" class="btn btn-purple">
+                            <span>Generate Quiz</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="quizResult" class="output-container" style="display: none;"></div>
+            </div>
+
+            <!-- 5. Learning Recommendations Module -->
+            <div class="tool-card" id="card_recommend">
+                <div class="card-header">
+                    <div class="card-icon icon-path">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Get Learning Recommendations</h3>
+                        <p>Structured roadmaps with beginner to advanced milestones, timelines, & resources</p>
+                    </div>
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="prompt-chips">
+                    <span class="chip-label">Try:</span>
+                    <button type="button" class="chip" onclick="fillInput('learningTopic', 'SQL')">SQL</button>
+                    <button type="button" class="chip" onclick="fillInput('learningTopic', 'Linear Regression')">Linear Regression</button>
+                    <button type="button" class="chip" onclick="fillInput('learningTopic', 'Data Structures & Algorithms')">DSA</button>
+                </div>
+
+                <form id="recommendationForm" onsubmit="handleRecommendation(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="learningTopic" placeholder="Enter skill or domain... e.g. SQL, Data Science, Python" required>
+                        <button type="submit" id="recommendBtn" class="btn btn-cyan">
+                            <span>Get Roadmap</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="recommendationResult" class="output-container" style="display: none;"></div>
+            </div>
+
+            <!-- 6. Supabase Cloud History Module -->
+            <div class="tool-card" id="card_history" style="display: none;">
+                <div class="card-header">
+                    <div class="card-icon icon-history">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <h3>Cloud Activity History</h3>
+                            <button type="button" class="btn btn-refresh" onclick="loadHistory()">
+                                <span>🔄 Refresh</span>
+                            </button>
+                        </div>
+                        <p>Real-time interactions recorded and synchronized with your Supabase database</p>
+                    </div>
+                </div>
+
+                <!-- Database Info Banner -->
+                <div class="supabase-info-card">
+                    <div class="supabase-info-header">
+                        <strong>⚡ Supabase Project:</strong>
+                        <code>https://uynwotrrtcyrwkfhxdws.supabase.co</code>
+                        <button type="button" class="btn-sm" onclick="toggleSchemaModal()">📋 View SQL Schema</button>
+                    </div>
+                    <div id="schemaModal" class="schema-box" style="display: none;">
+                        <p class="schema-hint">Paste this script in your <a href="https://supabase.com/dashboard/project/uynwotrrtcyrwkfhxdws/sql" target="_blank">Supabase SQL Editor</a> to enable remote table indexing:</p>
+                        <pre><code>CREATE TABLE IF NOT EXISTS public.edugenie_history (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    module_type VARCHAR(50) NOT NULL,
+    prompt_text TEXT NOT NULL,
+    response_text TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb
+);
+CREATE TABLE IF NOT EXISTS public.quiz_scores (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    topic TEXT NOT NULL,
+    score INT NOT NULL,
+    total_questions INT NOT NULL
+);
+ALTER TABLE public.edugenie_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.quiz_scores ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read/write" ON public.edugenie_history FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public read/write scores" ON public.quiz_scores FOR ALL USING (true) WITH CHECK (true);</code></pre>
+                    </div>
+                </div>
+
+                <!-- History Stream Container -->
+                <div id="historyStream" class="history-stream">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Loading your learning history...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+        <div class="footer-inner">
+            <p>EduGenie Intelligent Learning Assistant • Built with FastAPI, Google Gemini & Supabase</p>
+            <div class="footer-links">
+                <a href="/docs" target="_blank">Swagger API</a>
+                <span>•</span>
+                <span>SmartBridge / SmartInternz</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script Logic -->
+    <script>
+        // Character counter for summarizer
+        const summaryArea = document.getElementById('summaryText');
+        const summaryCounter = document.getElementById('summaryCharCount');
+        if (summaryArea && summaryCounter) {
+            summaryArea.addEventListener('input', () => {
+                summaryCounter.textContent = `${summaryArea.value.length} characters`;
+            });
+        }
+
+        // Quick fill prompt chips
+        function fillInput(inputId, text) {
+            const el = document.getElementById(inputId);
+            if (el) {
+                el.value = text;
+                el.focus();
+                if (inputId === 'summaryText' && summaryCounter) {
+                    summaryCounter.textContent = `${text.length} characters`;
+                }
+            }
+        }
+
+        // Navigation Tabs Switcher
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const allCards = document.querySelectorAll('.tool-card');
+            if (tabId === 'all') {
+                allCards.forEach(c => {
+                    if (c.id === 'card_history') c.style.display = 'none';
+                    else c.style.display = 'block';
+                });
+            } else {
+                allCards.forEach(c => c.style.display = 'none');
+                const target = document.getElementById(`card_${tabId}`);
+                if (target) target.style.display = 'block';
+            }
+        }
+
+        function toggleSchemaModal() {
+            const m = document.getElementById('schemaModal');
+            m.style.display = m.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Load History from Supabase
+        async function loadHistory() {
+            const container = document.getElementById('historyStream');
+            container.innerHTML = `
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Fetching synced activities from database...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch('/api/history?limit=15');
+                const result = await res.json();
+                const list = result.data || [];
+
+                if (list.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-history">
+                            <p>No activity recorded yet. Try asking a question or generating a quiz above!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '<div class="history-list">';
+                list.forEach(item => {
+                    const time = item.created_at ? new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Recent';
+                    const modBadge = getModuleBadge(item.module_type);
+                    html += `
+                        <div class="history-item">
+                            <div class="history-item-header">
+                                <span class="history-badge ${item.module_type}">${modBadge}</span>
+                                <span class="history-time">${time}</span>
+                            </div>
+                            <div class="history-query"><strong>Prompt:</strong> ${escapeHtml(item.prompt_text)}</div>
+                            <div class="history-preview">${escapeHtml((item.response_text || '').substring(0, 160))}...</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = `<div class="error-banner">⚠️ Failed to load history: ${escapeHtml(err.message)}</div>`;
+            }
+        }
+
+        function getModuleBadge(type) {
+            switch(type) {
+                case 'qa': return '💬 Q&A';
+                case 'explain': return '💡 Explainer';
+                case 'summarize': return '📝 Summary';
+                case 'quiz': return '🎯 Quiz';
+                case 'roadmap': return '🗺️ Roadmap';
+                default: return '⚡ AI';
+            }
+        }
+
+        // 1. Q&A Handler
+        async function handleQA(e) {
+            e.preventDefault();
+            const q = document.getElementById('question').value.trim();
+            const btn = document.getElementById('qaBtn');
+            const resDiv = document.getElementById('qaResult');
+
+            setLoading(btn, resDiv, 'Searching knowledge base & syncing...');
+
+            try {
+                const res = await fetch(`/qa?question=${encodeURIComponent(q)}`);
+                const data = await res.json();
+                renderResponseCard(resDiv, 'Answer', data.answer, '💬');
+            } catch (err) {
+                renderError(resDiv, err.message);
+            } finally {
+                resetBtn(btn, 'Get Answer');
+            }
+        }
+
+        // 2. Explanation Handler
+        async function handleExplain(e) {
+            e.preventDefault();
+            const topic = document.getElementById('topic').value.trim();
+            const btn = document.getElementById('explainBtn');
+            const resDiv = document.getElementById('explanationResult');
+
+            setLoading(btn, resDiv, 'Generating intuitive explanation...');
+
+            try {
+                const res = await fetch('/explain', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({topic})
+                });
+                const data = await res.json();
+                renderResponseCard(resDiv, `Explanation: ${escapeHtml(data.topic)}`, data.explanation || data.error, '💡');
+            } catch (err) {
+                renderError(resDiv, err.message);
+            } finally {
+                resetBtn(btn, 'Explain');
+            }
+        }
+
+        // 3. Summarization Handler
+        async function handleSummary(e) {
+            e.preventDefault();
+            const text = document.getElementById('summaryText').value.trim();
+            const btn = document.getElementById('summaryBtn');
+            const resDiv = document.getElementById('summaryResult');
+
+            setLoading(btn, resDiv, 'Analyzing and condensing text...');
+
+            try {
+                const res = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text})
+                });
+                const data = await res.json();
+                renderResponseCard(resDiv, 'Summary', data.summary || data.error, '📝');
+            } catch (err) {
+                renderError(resDiv, err.message);
+            } finally {
+                resetBtn(btn, 'Summarize Passage');
+            }
+        }
+
+        // 4. Interactive Quiz Handler
+        let currentQuizTopic = "";
+        let quizState = {};
+        async function handleQuiz(e) {
+            e.preventDefault();
+            const text = document.getElementById('quizText').value.trim();
+            currentQuizTopic = text;
+            const btn = document.getElementById('quizBtn');
+            const resDiv = document.getElementById('quizResult');
+
+            setLoading(btn, resDiv, 'Crafting context-aware quiz questions...');
+
+            try {
+                const res = await fetch('/quiz', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text})
+                });
+                const data = await res.json();
+                const quizList = data.quiz;
+
+                if (!Array.isArray(quizList) || quizList.length === 0) {
+                    renderError(resDiv, 'Could not generate quiz. Please try again.');
+                    return;
+                }
+
+                quizState = {
+                    total: quizList.length,
+                    answered: {},
+                    correctCount: 0
+                };
+
+                let html = `
+                    <div class="result-header">
+                        <div class="result-title"><span class="title-badge">🎯</span> Generated Quiz</div>
+                        <div class="score-pill" id="liveScoreBadge">0 / ${quizList.length} Answered</div>
+                    </div>
+                    <div class="quiz-deck">
+                `;
+
+                quizList.forEach((item, qIndex) => {
+                    const qNum = qIndex + 1;
+                    html += `
+                        <div class="quiz-card" id="quizCard_${qIndex}">
+                            <div class="quiz-badge">Question ${qNum}</div>
+                            <h4 class="quiz-question-title">${escapeHtml(item.question)}</h4>
+                            <div class="quiz-choices">
+                    `;
+                    item.options.forEach((opt, optIndex) => {
+                        const optId = `q${qIndex}_opt${optIndex}`;
+                        html += `
+                            <label class="choice-card" for="${optId}">
+                                <input type="radio" name="q_${qIndex}" id="${optId}" value="${escapeHtml(opt)}" onchange="selectOptionCard(this)">
+                                <span class="choice-marker">${String.fromCharCode(65 + optIndex)}</span>
+                                <span class="choice-text">${escapeHtml(opt)}</span>
+                            </label>
+                        `;
+                    });
+                    html += `
+                            </div>
+                            <div class="quiz-action-bar">
+                                <button type="button" class="btn btn-check" onclick="checkAnswer(${qIndex}, '${encodeURIComponent(item.answer)}')">Check Answer</button>
+                                <div class="quiz-feedback" id="feedback_${qIndex}"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = html;
+            } catch (err) {
+                renderError(resDiv, err.message);
+            } finally {
+                resetBtn(btn, 'Generate Quiz');
+            }
+        }
+
+        function selectOptionCard(radio) {
+            const parentChoices = radio.closest('.quiz-choices');
+            parentChoices.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+            radio.closest('.choice-card').classList.add('selected');
+        }
+
+        function checkAnswer(qIndex, encodedCorrectAnswer) {
+            const correctAnswer = decodeURIComponent(encodedCorrectAnswer);
+            const selectedRadio = document.querySelector(`input[name="q_${qIndex}"]:checked`);
+            const feedbackDiv = document.getElementById(`feedback_${qIndex}`);
+
+            if (!selectedRadio) {
+                feedbackDiv.innerHTML = `<span class="badge-feedback warn">⚠️ Please select an option first.</span>`;
+                return;
+            }
+
+            const isCorrect = selectedRadio.value.trim() === correctAnswer.trim();
+            const parentCard = document.getElementById(`quizCard_${qIndex}`);
+
+            if (isCorrect) {
+                feedbackDiv.innerHTML = `<span class="badge-feedback correct">✔ Correct! Excellent job.</span>`;
+                parentCard.classList.remove('wrong-state');
+                parentCard.classList.add('correct-state');
+                quizState.answered[qIndex] = true;
+            } else {
+                feedbackDiv.innerHTML = `<span class="badge-feedback incorrect">❌ Incorrect. Correct answer: <strong>${escapeHtml(correctAnswer)}</strong></span>`;
+                parentCard.classList.remove('correct-state');
+                parentCard.classList.add('wrong-state');
+                quizState.answered[qIndex] = false;
+            }
+
+            // Update live score
+            const answeredKeys = Object.keys(quizState.answered);
+            const rightKeys = answeredKeys.filter(k => quizState.answered[k] === true);
+            const scoreBadge = document.getElementById('liveScoreBadge');
+            if (scoreBadge) {
+                scoreBadge.textContent = `${rightKeys.length} / ${quizState.total} Correct (${answeredKeys.length} completed)`;
+                if (rightKeys.length === quizState.total) {
+                    scoreBadge.classList.add('perfect-score');
+                }
+            }
+
+            // Sync score to Supabase when all questions answered
+            if (answeredKeys.length === quizState.total) {
+                fetch('/api/quiz/record-score', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        topic: currentQuizTopic || 'General Quiz',
+                        score: rightKeys.length,
+                        total: quizState.total
+                    })
+                }).catch(() => {});
+            }
+        }
+
+        // 5. Learning Recommendations Handler
+        async function handleRecommendation(e) {
+            e.preventDefault();
+            const topic = document.getElementById('learningTopic').value.trim();
+            const btn = document.getElementById('recommendBtn');
+            const resDiv = document.getElementById('recommendationResult');
+
+            setLoading(btn, resDiv, 'Designing structured curriculum...');
+
+            try {
+                const res = await fetch(`/learn/recommendations?topic=${encodeURIComponent(topic)}`);
+                const data = await res.json();
+                renderResponseCard(resDiv, `Roadmap: ${escapeHtml(data.topic)}`, data.recommendation, '🗺️');
+            } catch (err) {
+                renderError(resDiv, err.message);
+            } finally {
+                resetBtn(btn, 'Get Roadmap');
+            }
+        }
+
+        // UI Helpers
+        function setLoading(btn, container, msg) {
+            btn.disabled = true;
+            btn.classList.add('loading');
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>${msg}</p>
+                </div>
+            `;
+        }
+
+        function resetBtn(btn, originalText) {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            const labelSpan = btn.querySelector('span');
+            if (labelSpan) labelSpan.textContent = originalText;
+        }
+
+        function renderResponseCard(container, title, content, icon) {
+            container.style.display = 'block';
+            const copyId = 'copy_' + Math.random().toString(36).substring(7);
+            container.innerHTML = `
+                <div class="result-header">
+                    <div class="result-title"><span class="title-badge">${icon}</span> ${escapeHtml(title)}</div>
+                    <button type="button" class="btn-copy" onclick="copyContent('${copyId}', this)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span>Copy</span>
+                    </button>
+                </div>
+                <div class="result-body formatted-markdown" id="${copyId}">
+                    ${formatMarkdown(content)}
+                </div>
+            `;
+        }
+
+        function renderError(container, msg) {
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div class="error-banner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span>⚠️ Request failed: ${escapeHtml(msg)}</span>
+                </div>
+            `;
+        }
+
+        function copyContent(elementId, btn) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            navigator.clipboard.writeText(el.innerText).then(() => {
+                const span = btn.querySelector('span');
+                const orig = span.textContent;
+                span.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    span.textContent = orig;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function formatMarkdown(str) {
+            if (!str) return '';
+            let s = escapeHtml(str);
+            s = s.replace(/### (.*?)\n/g, '<h5 class="md-h5">$1</h5>');
+            s = s.replace(/## (.*?)\n/g, '<h4 class="md-h4">$1</h4>');
+            s = s.replace(/# (.*?)\n/g, '<h3 class="md-h3">$1</h3>');
+            s = s.replace(/\*\*(.*?)\*\*/g, '<strong class="md-bold">$1</strong>');
+            s = s.replace(/^[•*]\s+(.*)$/gm, '<li class="md-bullet">$1</li>');
+            s = s.replace(/^\d+\.\s+(.*)$/gm, '<li class="md-num">$1</li>');
+            s = s.replace(/\n\n/g, '<br><br>');
+            s = s.replace(/\n/g, '<br>');
+            return s;
+        }
+    </script>
+</body>
+</html>
