@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Global holders for local Hugging Face model and tokenizer
+# Global holders for local Hugging Face model and tokenizer (optional if torch/transformers are installed)
 _explain_tokenizer = None
 _explain_model = None
 _is_downloading = False
@@ -38,7 +38,7 @@ def _get_local_model():
         if _explain_model is not None and _explain_tokenizer is not None:
             return _explain_tokenizer, _explain_model
 
-    # Check if model is already locally cached
+    # Check if transformers & torch are installed in environment
     try:
         from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
         tokenizer = AutoTokenizer.from_pretrained(_model_name, local_files_only=True)
@@ -48,23 +48,30 @@ def _get_local_model():
             _explain_tokenizer = tokenizer
             _explain_model = model
         return tokenizer, model
+    except ModuleNotFoundError:
+        # Running in lightweight/cloud environment (e.g. Vercel Serverless)
+        return None, None
     except Exception:
-        # Not cached yet; start background download thread if not already running
-        with _model_lock:
-            if not _is_downloading:
-                _is_downloading = True
-                t = threading.Thread(target=_load_model_worker, daemon=True)
-                t.start()
+        # Not cached locally; start background download thread if available
+        try:
+            import transformers
+            with _model_lock:
+                if not _is_downloading:
+                    _is_downloading = True
+                    t = threading.Thread(target=_load_model_worker, daemon=True)
+                    t.start()
+        except ImportError:
+            pass
         return None, None
 
 def explain_topic(topic: str) -> str:
     """
     Explains a concept in a simple, readable way for a school student.
-    Uses MBZUAI/LaMini-Flan-T5-783M locally when available, with cloud Gemini fallback.
+    Uses local model when torch/transformers are installed, with fast Gemini cloud execution.
     """
     input_text = f"Explain the concept of '{topic}' in a simple and clear way for a school student."
 
-    # 1. Try local LaMini-Flan-T5 model
+    # 1. Try local LaMini-Flan-T5 model if supported in environment
     tokenizer, model = _get_local_model()
     if tokenizer is not None and model is not None:
         try:
@@ -83,7 +90,7 @@ def explain_topic(topic: str) -> str:
         except Exception as e:
             print(f"Local inference warning: {e}. Falling back to cloud LLM.")
 
-    # 2. Cloud Gemini fallback (instant & high accuracy)
+    # 2. Cloud Gemini execution (Default for Vercel Serverless & cloud deploys)
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if api_key:
         try:
@@ -97,8 +104,8 @@ def explain_topic(topic: str) -> str:
                 "gemini-1.5-pro"
             ]:
                 try:
-                    m = genai.GenerativeModel(model_name=m_name)
-                    res = m.generate_content(input_text)
+                    model = genai.GenerativeModel(model_name=m_name)
+                    res = model.generate_content(input_text)
                     if hasattr(res, "text") and res.text:
                         return res.text.strip()
                 except Exception:
@@ -106,10 +113,10 @@ def explain_topic(topic: str) -> str:
         except Exception as e:
             print(f"Gemini fallback warning: {e}")
 
-    # 3. Informative explanation preview if downloading or offline
+    # 3. Informative explanation preview
     return (
         f"**Concept: {topic}**\n\n"
         f"In simple terms, {topic} is a key concept that helps us understand how components work together step-by-step. "
         f"Just like solving a puzzle, {topic} provides clear rules and patterns so that complex problems become easy to manage.\n\n"
-        f"*(Status: Local AI model 'LaMini-Flan-T5-783M' is initializing in background. Add GEMINI_API_KEY in .env for instant Gemini explanations!)*"
+        f"*(Configure GEMINI_API_KEY in Vercel Environment Variables to enable live AI responses!)*"
     )
